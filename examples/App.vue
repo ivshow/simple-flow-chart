@@ -15,7 +15,7 @@
         <button @click="addTemplate">addTemplate</button>
       </div>
       <div class="flow-container">
-        <super-flow
+        <simple-flow-chart
           ref="superFlow"
           :nodeMenu="nodeMenu"
           :linkMenu="linkMenuList"
@@ -37,7 +37,7 @@
               {{ meta.desc }}
             </div>
           </template> -->
-        </super-flow>
+        </simple-flow-chart>
       </div>
     </div>
   </div>

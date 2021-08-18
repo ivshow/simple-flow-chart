@@ -101,7 +101,7 @@ import MarkLine from './markLine';
 import { getOffset, isIntersect, isBool, isFun, vector, debounce, arrayReplace } from './utils';
 
 export default {
-  name: 'super-flow',
+  name: 'simple-flow-chart',
   props: {
     draggable: {
       type: Boolean,
