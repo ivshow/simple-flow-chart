@@ -1,4 +1,4 @@
-# vue-flow-chart
+# simple-flow-chart
 
 - Vue 流程图
 - 基于 [Vue-super-flow](https://www.npmjs.com/package/vue-super-flow)
@@ -6,16 +6,16 @@
 ## 安装
 
 ```bash
-npm install vue-flow-chart
+npm install simple-flow-chart
 # OR
-yarn add vue-flow-chart
+yarn add simple-flow-chart
 ```
 
 ```js
-import FlowChart from 'vue-flow-chart';
-import 'vue-flow-chart/lib/index.css';
+import SimpleFlowChart from 'simple-flow-chart';
+import 'simple-flow-chart/lib/index.css';
 
-Vue.use(FlowChart);
+Vue.use(SimpleFlowChart);
 ```
 
 ## 属性

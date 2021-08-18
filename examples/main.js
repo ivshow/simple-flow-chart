@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import App from './App';
-import FlowChart from '../packages/index';
+import SimpleFlowChart from '../packages/index';
 
-Vue.use(FlowChart);
+Vue.use(SimpleFlowChart);
 
 Vue.config.productionTip = false;
 
