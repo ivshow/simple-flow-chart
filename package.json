@@ -1,0 +1,56 @@
+{
+  "name": "vue-flow-chart",
+  "version": "1.3.6",
+  "keywords": [
+    "flowChart",
+    "super flow",
+    "vue flow chart",
+    "vue 流程图"
+  ],
+  "license": "MIT",
+  "description": "Vue-flow-chart is a quick and convenient Vue plug-in to realize flow chart based on Vue-super-flow",
+  "main": "lib/index.umd.min.js",
+  "author": "jaydon<vshow@dooomi.com>",
+  "homepage": "https://github.com/ivshow/vue-flow-chart.git",
+  "files": [
+    "/lib/index.umd.min.js",
+    "/lib/index.css",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "vue-cli-service serve",
+    "build": "yarn lib && yarn pack",
+    "lib": "vue-cli-service build --target lib --formats umd-min --name index --dest lib packages/index.js",
+    "deploy": "yarn lib && release-it -- patch"
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release v${version}",
+      "requireCleanWorkingDir": false,
+      "tag": false,
+      "commit": true,
+      "push": true
+    },
+    "github": {
+      "release": false
+    },
+    "npm": {
+      "publish": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.13",
+    "@vue/cli-service": "~4.5.13",
+    "core-js": "^3.12.1",
+    "less": "^4.1.1",
+    "less-loader": "^7.0.0",
+    "release-it": "^14.11.5",
+    "vue": "^2.6.12",
+    "vue-template-compiler": "^2.6.12"
+  }
+}
