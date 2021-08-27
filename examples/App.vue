@@ -12,7 +12,15 @@
             {{ item.label }}
           </button>
         </div>
-        <button @click="addTemplate">addTemplate</button>
+        <div class="node-item">
+          <button @click="addTemplate">addTemplate</button>
+        </div>
+        <div class="node-item">
+          <button @click="addTemplate2">addTemplate2</button>
+        </div>
+        <div class="node-item">
+          <button @click="saveTemplate">保存模板</button>
+        </div>
       </div>
       <div class="flow-container">
         <simple-flow-chart
@@ -45,6 +53,7 @@
 
 <script>
 import _ from 'lodash';
+import { template2 } from './data';
 
 const basicNodeInfo = {
   width: 120,
@@ -147,6 +156,12 @@ export default {
     addTemplate() {
       const nodes = this.basicNodeList.map(x => ({ ...basicNodeInfo, ...x }));
       this.$refs.superFlow.addTemplate(nodes);
+    },
+    addTemplate2() {
+      this.$refs.superFlow.initTemplate(template2);
+    },
+    saveTemplate() {
+      this.$refs.superFlow.saveTemplate();
     }
   }
 };

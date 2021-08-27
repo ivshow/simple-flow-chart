@@ -1,6 +1,6 @@
 {
   "name": "simple-flow-chart",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "keywords": [
     "flowChart",
     "super flow",
@@ -53,5 +53,9 @@
     "release-it": "^14.11.5",
     "vue": "^2.6.12",
     "vue-template-compiler": "^2.6.12"
+  },
+  "dependencies": {
+    "vue-clipboard2": "^0.3.1",
+    "vue-js-modal": "^2.0.1"
   }
 }

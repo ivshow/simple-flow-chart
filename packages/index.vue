@@ -88,6 +88,11 @@
       @mousedown="selectAllMaskMouseDown"
       @contextmenu.prevent.stop
     ></div>
+
+    <modal name="templateModal" :height="500">
+      <textarea class="template-data" v-model="templateData"></textarea>
+      <button v-clipboard:copy="templateData">复制</button></modal
+    >
   </div>
 </template>
 
@@ -209,7 +214,8 @@ export default {
       },
       loaded: false,
       clientWidth: 0,
-      clientHeight: 0
+      clientHeight: 0,
+      templateData: ''
     };
   },
   components: {
@@ -564,6 +570,17 @@ export default {
 
       this.graph.initNode(nodeList);
       this.graph.initLink(linkList);
+    },
+
+    initTemplate({ nodeList, linkList }) {
+      this.graph.initNode(nodeList);
+      this.graph.initLink(linkList);
+    },
+
+    saveTemplate() {
+      const { nodeList, linkList } = this.toJSON();
+      this.templateData = JSON.stringify({ nodeList, linkList }, null, 2);
+      this.$modal.show('templateModal');
     }
   },
   watch: {
@@ -600,7 +617,7 @@ export default {
 };
 </script>
 
-<style lang="less">
+<style scoped lang="less">
 .super-flow {
   font-family: Apple System, 'SF Pro SC', 'SF Pro Display', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB',
     STHeiti, 'Microsoft YaHei', 'Microsoft JhengHei', 'Source Han Sans SC', 'Noto Sans CJK SC', 'Source Han Sans CN',
@@ -620,5 +637,11 @@ export default {
     cursor: move;
     outline: none;
   }
+}
+.template-data {
+  width: 100%;
+  height: 450px;
+  border: none;
+  outline: 0;
 }
 </style>
