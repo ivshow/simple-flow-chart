@@ -84,10 +84,10 @@ class Graph extends GraphEvent {
     return new GraphLink(options, this);
   }
 
-  addNode(options) {
+  addNode(options, index) {
     const node = options.constructor === GraphNode ? options : this.createNode(options);
 
-    this.nodeList.push(node);
+    this.nodeList.splice(index ?? this.nodeList.length, 0, node);
     return node;
   }
 
@@ -144,7 +144,7 @@ class Graph extends GraphEvent {
 
   toJSON() {
     return {
-      origin: this.origin,
+      // origin: this.origin,
       nodeList: this.nodeList.map(node => node.toJSON()),
       linkList: this.linkList.map(link => link.toJSON())
     };

@@ -13,10 +13,7 @@
           </button>
         </div>
         <div class="node-item">
-          <button @click="addTemplate">addTemplate</button>
-        </div>
-        <div class="node-item">
-          <button @click="addTemplate2">addTemplate2</button>
+          <button @click="addTemplate">添加模板</button>
         </div>
         <div class="node-item">
           <button @click="saveTemplate">保存模板</button>
@@ -24,15 +21,17 @@
       </div>
       <div class="flow-container">
         <simple-flow-chart
-          ref="superFlow"
+          ref="flowChart"
           :nodeMenu="nodeMenu"
           :linkMenu="linkMenuList"
           :linkBaseStyle="linkBaseStyle"
           :range="range"
           maxTotal="20"
+          :draggable="false"
         >
           <template v-slot:node="{ meta }">
             <div
+              @mousedown.stop
               @click="handleNodeClick(meta.id)"
               class="flow-node ellipsis"
               :class="{ active: activeNodeId === meta.id }"
@@ -53,7 +52,6 @@
 
 <script>
 import _ from 'lodash';
-import { template2 } from './data';
 
 const basicNodeInfo = {
   width: 120,
@@ -135,6 +133,7 @@ export default {
     removeNode(node) {
       node.remove();
       this.$set(_.find(this.basicNodeList, { id: node.id }), 'disabled', false);
+      // this.$refs.flowChart.updateFishBoneNode();
     },
     handleNodeClick(id) {
       this.activeNodeId = id;
@@ -143,7 +142,16 @@ export default {
       link.meta.desc = prompt('') || 0;
     },
     onDragend(e, item) {
-      const node = this.$refs.superFlow.addNodeIfNeed(e, {
+      // const node = this.$refs.flowChart.addNode(
+      //   {
+      //     ...basicNodeInfo,
+      //     ...item
+      //   },
+      //   'fishBone',
+      //   2
+      // );
+
+      const node = this.$refs.flowChart.addNodeIfNeed(e, {
         ...basicNodeInfo,
         ...item
       });
@@ -155,13 +163,12 @@ export default {
     },
     addTemplate() {
       const nodes = this.basicNodeList.map(x => ({ ...basicNodeInfo, ...x }));
-      this.$refs.superFlow.addTemplate(nodes);
-    },
-    addTemplate2() {
-      this.$refs.superFlow.initTemplate(template2);
+      // nodes.splice(2, 1);
+      this.$refs.flowChart.addFishBoneTemplate(nodes);
     },
     saveTemplate() {
-      this.$refs.superFlow.saveTemplate();
+      const data = this.$refs.flowChart.toJSON();
+      console.log('%c 🍭 data: ', 'font-size:20px;background-color: #ED9EC7;color:#fff;', data);
     }
   }
 };

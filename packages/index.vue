@@ -4,7 +4,7 @@
  * Time: 9:52
 -->
 <template>
-  <div class="super-flow" ref="flow-canvas" @contextmenu.prevent.stop="contextmenu">
+  <div class="simple-flow-chart" ref="flow-canvas" @contextmenu.prevent.stop="contextmenu">
     <graph-line
       v-if="temEdgeConf.visible"
       :padding="linkPadding"
@@ -97,6 +97,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Graph from './Graph';
 import GraphMenu from './menu';
 import GraphNode from './node';
@@ -527,8 +528,16 @@ export default {
       return vector(offset).minus(this.graph.origin).end;
     },
 
-    addNode(options) {
-      return this.graph.addNode(options);
+    addNode(options, type = 'line', index) {
+      return type === 'line' ? this.graph.addNode(options, index) : this.updateFishBoneNode(options, index);
+    },
+
+    updateFishBoneNode(node, index) {
+      const { nodeList } = this.toJSON();
+
+      node && nodeList.splice(index, 0, node);
+      this.addFishBoneTemplate(nodeList);
+      return node;
     },
 
     changeLinkStyle() {
@@ -568,8 +577,39 @@ export default {
         };
       });
 
-      this.graph.initNode(nodeList);
-      this.graph.initLink(linkList);
+      this.initTemplate({ nodeList, linkList });
+    },
+
+    addFishBoneTemplate(nodes) {
+      const baseTop = 250;
+      const baseLeft = 50;
+      const coordinateY = 100;
+      const nodeList = nodes.map(({ meta, ...node }, i) => {
+        const offset = ['start', 'end'].includes(node.id) ? 0 : coordinateY;
+        return {
+          ...node,
+          meta: Object.assign({}, meta, node),
+          coordinate: [baseLeft + i * 150, i % 2 ? baseTop - offset : baseTop + offset]
+        };
+      });
+
+      const linkList = nodeList.reduce((prev, { id, width, height }, i) => {
+        const endId = nodeList[i + 1]?.id;
+        const prevNode = prev[i - 1];
+        const startAt = id === 'start' ? [width, height / 2] : prevNode?.endAt;
+        const endAt = i % 2 ? [width / 2, 0] : [width / 2, height];
+
+        prev.push({
+          startId: id,
+          endId,
+          startAt,
+          endAt: endId === 'end' ? [0, height / 2] : endAt
+        });
+
+        return prev;
+      }, []);
+
+      this.initTemplate({ nodeList, linkList });
     },
 
     initTemplate({ nodeList, linkList }) {
@@ -577,10 +617,9 @@ export default {
       this.graph.initLink(linkList);
     },
 
-    saveTemplate() {
-      const { nodeList, linkList } = this.toJSON();
-      this.templateData = JSON.stringify({ nodeList, linkList }, null, 2);
-      this.$modal.show('templateModal');
+    saveFlowChart() {
+      // this.templateData = JSON.stringify({ nodeList, linkList }, null, 2);
+      // this.$modal.show('templateModal');
     }
   },
   watch: {
@@ -618,7 +657,7 @@ export default {
 </script>
 
 <style scoped lang="less">
-.super-flow {
+.simple-flow-chart {
   font-family: Apple System, 'SF Pro SC', 'SF Pro Display', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB',
     STHeiti, 'Microsoft YaHei', 'Microsoft JhengHei', 'Source Han Sans SC', 'Noto Sans CJK SC', 'Source Han Sans CN',
     sans-serif;
@@ -638,6 +677,7 @@ export default {
     outline: none;
   }
 }
+
 .template-data {
   width: 100%;
   height: 450px;
