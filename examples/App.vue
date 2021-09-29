@@ -29,7 +29,7 @@
           maxTotal="20"
           :draggable="false"
         >
-          <template v-slot:node="{ meta }">
+          <template #node="{ meta }">
             <div
               @mousedown.stop
               @click="handleNodeClick(meta.id)"
@@ -39,6 +39,9 @@
               {{ meta.label }}
             </div>
           </template>
+          <!-- <template #menuItem="{ item }">
+            <div>{{ item.label }}</div>
+          </template> -->
           <!-- <template v-slot:desc="{ meta }">
             <div>
               {{ meta.desc }}
@@ -117,13 +120,11 @@ export default {
         ]
       ],
       linkBaseStyle: {
-        color: '#5959FF', // line 颜色
-        hover: 'red', // line hover 的颜色
+        lineColor: '#5959FF', // line 颜色
+        lineHover: 'red', // line hover 的颜色
+        lineColorMinor: 'yellow', // line 没有数字的颜色
         textColor: '#fff', // line 描述文字颜色
         textHover: '#fff', // line 描述文字 hover 颜色
-        font: '12px Arial ', // line 描述文字 字体设置 参考 canvas font
-        dotted: false, // 是否是虚线
-        lineDash: [4, 4], // 虚线时生效
         background: '#5959FF' // 描述文字背景色
       },
       range: ['node2', 'node5']
@@ -139,7 +140,7 @@ export default {
       this.activeNodeId = id;
     },
     setLinkDesc(link) {
-      link.meta.desc = prompt('') || 0;
+      link.meta.desc = prompt('');
     },
     onDragend(e, item) {
       // const node = this.$refs.flowChart.addNode(

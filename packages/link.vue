@@ -6,7 +6,7 @@
 <template>
   <div class="super-flow__line">
     <canvas ref="canvas"> </canvas>
-    <div class="text" :style="textStyle">
+    <div class="text" :style="textStyle" v-if="hasTextDesc">
       <slot :meta="link.meta">{{ link.meta.desc }}</slot>
     </div>
   </div>
@@ -59,8 +59,8 @@ export default {
     styles() {
       return Object.assign(
         {
-          hover: '#FF0000',
-          color: '#666666',
+          lineHover: '#FF0000',
+          lineColor: '#666666',
           textColor: '#666666',
           textHover: '#FF0000',
           font: '14px Arial',
@@ -70,6 +70,9 @@ export default {
         },
         this.linkBaseStyle
       );
+    },
+    hasTextDesc() {
+      return this.link.meta.desc !== '';
     },
     inPath: {
       get() {
@@ -119,16 +122,15 @@ export default {
           Object.assign(this.styles, style);
         }
       }
+      const { lineHover, lineColor, lineColorMinor, textColor, textHover } = this.styles;
+
       if (this.highlight) {
-        const color = this.styles.hover;
-        const textColor = this.styles.textHover;
-        this.drawLine(color);
-        this.drawDesc(textColor);
-        this.drawArrow(color);
+        this.drawLine(lineHover);
+        this.drawDesc(textHover);
+        this.drawArrow(lineHover);
         this.$el.style.zIndex = '2';
       } else {
-        const color = this.styles.color;
-        const textColor = this.styles.textColor;
+        const color = this.hasTextDesc ? lineColor : lineColorMinor;
         this.drawLine(color);
         this.drawDesc(textColor);
         this.drawArrow(color);
