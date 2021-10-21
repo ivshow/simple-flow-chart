@@ -72,7 +72,7 @@ export default {
       );
     },
     hasTextDesc() {
-      return this.link.meta.desc !== '';
+      return this.link.meta.desc === 0 || !!this.link.meta.desc;
     },
     inPath: {
       get() {

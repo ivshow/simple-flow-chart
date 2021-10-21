@@ -239,7 +239,7 @@ export default {
       const allPath = [];
       const { linkList } = this.graph;
       const [start, end] = this.range;
-      const findPath = (id, path = [], nodeIds = [], isEnd, total = 0) => {
+      const findPath = (id, path = [], isEnd, total = 0) => {
         const children = linkList.filter(x => x.start.id === id);
 
         if (isEnd && total > Number(this.maxTotal)) {
@@ -249,14 +249,12 @@ export default {
         children.forEach(x => {
           const paths = [...path];
           let number = total;
-          if (id === start || nodeIds.includes(start)) {
-            paths.push(x.id);
-            number += Number(x.meta.desc);
-          }
-          findPath(x.end.id, paths, [...nodeIds, id], x.end.id === end, number);
+          paths.push(x.id);
+          number += Number(x.meta.desc);
+          findPath(x.end.id, paths, x.end.id === end, number);
         });
       };
-      findPath('start');
+      findPath(start);
       return allPath;
     }
   },
