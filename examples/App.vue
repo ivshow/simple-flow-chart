@@ -28,6 +28,8 @@
           :range="range"
           maxTotal="20"
           :draggable="false"
+          @canvasMousedown="canvasMousedown"
+          @canvasMousemove="canvasMousemove"
         >
           <template #node="{ meta }">
             <div
@@ -170,6 +172,12 @@ export default {
     saveTemplate() {
       const data = this.$refs.flowChart.toJSON();
       console.log('%c 🍭 data: ', 'font-size:20px;background-color: #ED9EC7;color:#fff;', data);
+    },
+    canvasMousedown() {
+      console.log('按下');
+    },
+    canvasMousemove() {
+      console.log('移动');
     }
   }
 };

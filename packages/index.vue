@@ -4,7 +4,13 @@
  * Time: 9:52
 -->
 <template>
-  <div class="simple-flow-chart" ref="flow-canvas" @contextmenu.prevent.stop="contextmenu">
+  <div
+    class="simple-flow-chart"
+    ref="flow-canvas"
+    @contextmenu.prevent.stop="contextmenu"
+    @mousedown.left="canvasMousedown"
+    @mousemove="canvasMousemove"
+  >
     <graph-line
       v-if="temEdgeConf.visible"
       :padding="linkPadding"
@@ -610,6 +616,13 @@ export default {
       this.initTemplate({ nodeList, linkList });
     },
 
+    canvasMousedown(e) {
+      this.$emit('canvasMousedown', e);
+    },
+    canvasMousemove(e) {
+      this.$emit('canvasMousemove', e);
+    },
+
     initTemplate({ nodeList, linkList }) {
       this.graph.initNode(nodeList);
       this.graph.initLink(linkList);
@@ -645,10 +658,14 @@ export default {
       this.graph.initLink(this.linkList);
     },
     'graph.linkList'() {
-      this.$nextTick(this.changeLinkStyle);
+      if (this.range.length === 2) {
+        this.$nextTick(this.changeLinkStyle);
+      }
     },
     range() {
-      this.changeLinkStyle();
+      if (this.range.length === 2) {
+        this.changeLinkStyle();
+      }
     }
   }
 };

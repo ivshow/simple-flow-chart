@@ -9,7 +9,7 @@
     class="super-flow__node"
     :class="{ 'can-move': nodeDrop }"
     :style="style"
-    @mousedown.left="nodeMousedown"
+    @mousedown.left.stop="nodeMousedown"
     @mouseenter="nodeMouseenter"
     @mouseleave="nodeMouseleave"
     @mouseup="nodeMouseup"
