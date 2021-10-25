@@ -122,12 +122,10 @@ export default {
         ]
       ],
       linkBaseStyle: {
-        lineColor: '#5959FF', // line 颜色
-        lineHover: 'red', // line hover 的颜色
-        lineColorMinor: 'yellow', // line 没有数字的颜色
-        textColor: '#fff', // line 描述文字颜色
-        textHover: '#fff', // line 描述文字 hover 颜色
-        background: '#5959FF' // 描述文字背景色
+        lineColor: '#007CCA', // line 颜色
+        lineCheck: 'red', //line 校验的颜色
+        lineColorMinor: '#FDCF53', // line 没有数字的颜色
+        background: 'none' // 描述文字背景色
       },
       range: ['node2', 'node5']
     };

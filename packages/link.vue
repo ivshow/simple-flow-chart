@@ -6,7 +6,7 @@
 <template>
   <div class="super-flow__line">
     <canvas ref="canvas"> </canvas>
-    <div class="text" :style="textStyle" v-if="hasTextDesc">
+    <div class="text" :class="{'vertical': descCoordinate[0]<descCoordinate[1]}" :style="textStyle" v-if="hasTextDesc">
       <slot :meta="link.meta">{{ link.meta.desc }}</slot>
     </div>
   </div>
@@ -42,7 +42,8 @@ export default {
       textStyle: {
         left: 0,
         top: 0
-      }
+      },
+      descCoordinate:[0, 0],
     };
   },
   mounted() {
@@ -59,10 +60,13 @@ export default {
     styles() {
       return Object.assign(
         {
-          lineHover: '#FF0000',
-          lineColor: '#666666',
-          textColor: '#666666',
-          textHover: '#FF0000',
+          lineColor: '#5959FF', // line 颜色
+          lineHover: '#000', // line hover 的颜色
+          lineCheck: 'red',  //line 校验的颜色
+          lineColorMinor: 'yellow', // line 没有数字的颜色
+          textColor: '#fff', // line 描述文字颜色
+          textHover: '#000', // line 描述文字 hover 颜色
+          textCheck: 'pink', // 校验描述文字 颜色
           font: '14px Arial',
           dotted: false,
           lineDash: [4, 4],
@@ -122,28 +126,38 @@ export default {
           Object.assign(this.styles, style);
         }
       }
-      const { lineHover, lineColor, lineColorMinor, textColor, textHover } = this.styles;
-
+      const { lineColor, lineCheck, lineColorMinor } = this.styles;
+      
       if (this.highlight) {
-        this.drawLine(lineHover);
-        this.drawDesc(textHover);
-        this.drawArrow(lineHover);
+        this.drawLine(lineCheck);
+        this.drawDesc(lineCheck);
+        this.drawArrow(lineCheck);
         this.$el.style.zIndex = '2';
       } else {
         const color = this.hasTextDesc ? lineColor : lineColorMinor;
         this.drawLine(color);
-        this.drawDesc(textColor);
+        this.drawDesc(color);
         this.drawArrow(color);
         this.$el.style.zIndex = '1';
       }
+      
     },
 
     drawLine(strokeStyle) {
+      if(!this.currentPointList.length) {return}
       const lineWidth = 2;
       const ctx = this.ctx;
 
       ctx.lineJoin = 'round';
       ctx.beginPath();
+      if (this.inPath) {
+        ctx.shadowBlur = 2;
+        ctx.shadowColor = strokeStyle;
+      }else {
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'none';
+      }
+      
       if (this.styles.dotted) {
         ctx.setLineDash(this.styles.lineDash);
       }
@@ -154,16 +168,20 @@ export default {
           ctx.moveTo(...point);
         } else {
           ctx.lineTo(...point);
-          ctx.stroke();
         }
       });
-
+      ctx.stroke();
       ctx.save();
     },
 
     drawDesc(color) {
       const { background } = this.styles;
       const [x, y] = this.descPosition();
+      this.descCoordinate = [x,y]
+      if (this.inPath) {
+        this.textStyle = { left: x + 'px', top: y + 'px', background, color, 'font-size': '16px' };
+        return
+      }
       this.textStyle = { left: x + 'px', top: y + 'px', background, color };
     },
 
@@ -341,7 +359,7 @@ export default {
       this.draw();
     },
     inPath() {
-      // this.initLine();
+      this.initLine();
     },
     'link.meta': {
       deep: true,
