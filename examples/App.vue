@@ -27,13 +27,11 @@
           :linkBaseStyle="linkBaseStyle"
           :range="range"
           maxTotal="20"
-          :draggable="false"
           @canvasMousedown="canvasMousedown"
           @canvasMousemove="canvasMousemove"
         >
           <template #node="{ meta }">
             <div
-              @mousedown.stop
               @click="handleNodeClick(meta.id)"
               class="flow-node ellipsis"
               :class="{ active: activeNodeId === meta.id }"

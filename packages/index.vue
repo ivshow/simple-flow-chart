@@ -244,24 +244,37 @@ export default {
     getBeyondLimitPath() {
       const allPath = [];
       const { linkList } = this.graph;
-      const [start, end] = this.range;
-      const findPath = (id, path = [], isEnd, total = 0) => {
-        const children = linkList.filter(x => x.start.id === id);
+      const [start] = this.range;
+      const findPath = (id, path = [], total = 0, parentIds = []) => {
+        const children = linkList.filter(x => x.start.id === id && this.isNodeInRange(x.end.id));
 
-        if (isEnd && total > Number(this.maxTotal)) {
+        // 本次循环无子级 或者 id已存在，则结束
+        if ((!children.length || parentIds.includes(id)) && total > Number(this.maxTotal)) {
           return allPath.push(...path);
         }
+
+        // 通过已存在的id，解决死循环
+        if (parentIds.includes(id)) return;
 
         children.forEach(x => {
           const paths = [...path];
           let number = total;
           paths.push(x.id);
           number += Number(x.meta.desc);
-          findPath(x.end.id, paths, x.end.id === end, number);
+          findPath(x.end.id, paths, number, [...parentIds, id]);
         });
       };
+
       findPath(start);
+
       return allPath;
+    },
+    rangeNodeIndex() {
+      const [start, end] = this.range;
+      const startIndex = _.findIndex(this.graph.nodeList, { id: start });
+      const endIndex = _.findIndex(this.graph.nodeList, { id: end });
+
+      return [startIndex, endIndex + 1];
     }
   },
   mounted() {
@@ -430,7 +443,7 @@ export default {
       const position = getOffset(evt);
       let list, source;
 
-      if (mouseonLink && mouseonLink.isPointInLink(position)) {
+      if (mouseonLink) {
         list = this.initMenu(this.linkMenu, mouseonLink);
         source = mouseonLink;
       } else {
@@ -631,6 +644,11 @@ export default {
     saveFlowChart() {
       // this.templateData = JSON.stringify({ nodeList, linkList }, null, 2);
       // this.$modal.show('templateModal');
+    },
+
+    isNodeInRange(id) {
+      const index = _.findIndex(this.graph.nodeList, { id });
+      return _.inRange(index, ...this.rangeNodeIndex);
     }
   },
   watch: {

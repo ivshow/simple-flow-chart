@@ -6,13 +6,14 @@
 <template>
   <div class="super-flow__line">
     <canvas ref="canvas"> </canvas>
-    <div class="text" :class="{'vertical': descCoordinate[0]<descCoordinate[1]}" :style="textStyle" v-if="hasTextDesc">
+    <div class="text" :style="textStyle" v-if="hasTextDesc">
       <slot :meta="link.meta">{{ link.meta.desc }}</slot>
     </div>
   </div>
 </template>
 
 <script>
+import _ from 'lodash';
 import { isFun, isObject, isString, vector } from './utils';
 
 export default {
@@ -42,8 +43,7 @@ export default {
       textStyle: {
         left: 0,
         top: 0
-      },
-      descCoordinate:[0, 0],
+      }
     };
   },
   mounted() {
@@ -62,7 +62,7 @@ export default {
         {
           lineColor: '#5959FF', // line 颜色
           lineHover: '#000', // line hover 的颜色
-          lineCheck: 'red',  //line 校验的颜色
+          lineCheck: 'red', //line 校验的颜色
           lineColorMinor: 'yellow', // line 没有数字的颜色
           textColor: '#fff', // line 描述文字颜色
           textHover: '#000', // line 描述文字 hover 颜色
@@ -127,7 +127,7 @@ export default {
         }
       }
       const { lineColor, lineCheck, lineColorMinor } = this.styles;
-      
+
       if (this.highlight) {
         this.drawLine(lineCheck);
         this.drawDesc(lineCheck);
@@ -140,11 +140,12 @@ export default {
         this.drawArrow(color);
         this.$el.style.zIndex = '1';
       }
-      
     },
 
     drawLine(strokeStyle) {
-      if(!this.currentPointList.length) {return}
+      if (!this.currentPointList.length) {
+        return;
+      }
       const lineWidth = 2;
       const ctx = this.ctx;
 
@@ -153,11 +154,11 @@ export default {
       if (this.inPath) {
         ctx.shadowBlur = 2;
         ctx.shadowColor = strokeStyle;
-      }else {
+      } else {
         ctx.shadowBlur = 0;
         ctx.shadowColor = 'none';
       }
-      
+
       if (this.styles.dotted) {
         ctx.setLineDash(this.styles.lineDash);
       }
@@ -177,12 +178,14 @@ export default {
     drawDesc(color) {
       const { background } = this.styles;
       const [x, y] = this.descPosition();
-      this.descCoordinate = [x,y]
-      if (this.inPath) {
-        this.textStyle = { left: x + 'px', top: y + 'px', background, color, 'font-size': '16px' };
-        return
-      }
-      this.textStyle = { left: x + 'px', top: y + 'px', background, color };
+      this.textStyle = {
+        left: x + 'px',
+        top: y + 'px',
+        background,
+        color,
+        transform: this.setTextCenter(),
+        ...(this.inPath && { 'font-size': '16px' })
+      };
     },
 
     drawDesc2(color) {
@@ -217,6 +220,13 @@ export default {
 
       // this.ctx.fillStyle = color;
       // ctx.fillText(text, x, y);
+    },
+
+    setTextCenter() {
+      const [startX, startY] = this.currentPointList[0];
+      const [endX, endY] = _.last(this.currentPointList);
+
+      return startX === endX ? 'translateY(-50%)' : startY === endY ? 'translateX(-50%)' : 'none';
     },
 
     linkDescPosition(descWidth, r) {
@@ -336,9 +346,13 @@ export default {
     },
 
     rootMousemove({ evt }) {
-      this.inPath = this.isPointInStroke(evt);
-      // this.inText = this.isInEllipse(evt);
+      this.inPath = this.isPointInStroke(evt) || this.isInText(evt);
       return this.inPath;
+    },
+
+    isInText({ clientX, clientY }) {
+      const { top, right, bottom, left } = this.$el.querySelector('.text').getBoundingClientRect();
+      return clientX > left && clientX < right && clientY > top && clientY < bottom;
     },
 
     dblclick({ evt }) {
@@ -400,7 +414,6 @@ export default {
     padding: 3px 6px;
     border-radius: 50%;
     font-size: 12px;
-    transform: translate(-50%, -50%);
     cursor: pointer;
   }
 }
