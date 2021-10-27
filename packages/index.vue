@@ -244,12 +244,11 @@ export default {
     getBeyondLimitPath() {
       const allPath = [];
       const { linkList } = this.graph;
-      const [start] = this.range;
-      const findPath = (id, path = [], total = 0, parentIds = []) => {
-        const children = linkList.filter(x => x.start.id === id && this.isNodeInRange(x.end.id));
+      const [start, end] = this.range;
+      const findPath = (id, path = [], isEnd, total = 0, parentIds = []) => {
+        const children = linkList.filter(x => x.start.id === id);
 
-        // 本次循环无子级 或者 id已存在，则结束
-        if ((!children.length || parentIds.includes(id)) && total > Number(this.maxTotal)) {
+        if (isEnd && total > Number(this.maxTotal)) {
           return allPath.push(...path);
         }
 
@@ -261,7 +260,7 @@ export default {
           let number = total;
           paths.push(x.id);
           number += Number(x.meta.desc);
-          findPath(x.end.id, paths, number, [...parentIds, id]);
+          findPath(x.end.id, paths, x.end.id === end, number, [...parentIds, id]);
         });
       };
 
@@ -561,12 +560,11 @@ export default {
       this.graph.linkList.forEach(x => this.$set(x.meta, 'error', this.getBeyondLimitPath.includes(x.id)));
     },
 
-    addNodeIfNeed({ clientX, clientY }, info) {
-      const { top, right, bottom, left } = this.$el.getBoundingClientRect();
+    // 判断鼠标是否进入 flow container
+    addNodeIfNeed(evevt, info) {
+      if (isIntersect(evevt, this.$el)) {
+        const coordinate = this.getMouseCoordinate(evevt.clientX - info.width / 2, evevt.clientY - info.height / 2);
 
-      // 判断鼠标是否进入 flow container
-      if (clientX > left && clientX < right && clientY > top && clientY < bottom) {
-        const coordinate = this.getMouseCoordinate(clientX - info.width / 2, clientY - info.height / 2);
         return this.addNode({
           ...info,
           id: info.id,

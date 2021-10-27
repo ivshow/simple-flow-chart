@@ -14,7 +14,7 @@
 
 <script>
 import _ from 'lodash';
-import { isFun, isObject, isString, vector } from './utils';
+import { isIntersect, isObject, getOffset, vector } from './utils';
 
 export default {
   props: {
@@ -332,16 +332,8 @@ export default {
       ctx.restore();
     },
 
-    getCoordinates(evt) {
-      const { clientX, clientY } = evt;
-
-      const { top, left } = this.$refs.canvas.getBoundingClientRect();
-
-      return [clientX - left, clientY - top];
-    },
-
     isPointInStroke(evt) {
-      const [x, y] = this.getCoordinates(evt);
+      const [x, y] = getOffset(evt, this.$refs.canvas);
       return this.link.isPointInLink([this.left + x, this.top + y], this.currentPathPointList);
     },
 
@@ -350,9 +342,8 @@ export default {
       return this.inPath;
     },
 
-    isInText({ clientX, clientY }) {
-      const { top, right, bottom, left } = this.$el.querySelector('.text').getBoundingClientRect();
-      return clientX > left && clientX < right && clientY > top && clientY < bottom;
+    isInText(event) {
+      return isIntersect(event, this.$el.querySelector('.text'));
     },
 
     dblclick({ evt }) {
@@ -361,7 +352,7 @@ export default {
 
     isInEllipse(evt) {
       const { x, y, a, b } = this.ellipse;
-      const [mouseX, mouseY] = this.getCoordinates(evt);
+      const [mouseX, mouseY] = getOffset(evt, this.$refs.canvas);
       const dx = mouseX - x;
       const dy = mouseY - y;
 
