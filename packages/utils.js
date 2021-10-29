@@ -15,14 +15,23 @@ export function uuid(before = '', after = '') {
   return before + uuid.join('') + after;
 }
 
-export function getOffset(evt, target = null) {
-  const { clientX, clientY, currentTarget } = evt;
 
-  const current = target || currentTarget;
-
-  const { left, top } = current.getBoundingClientRect();
-
-  return [clientX - left, clientY - top];
+export function getOffset(evt, target = null, pTarget = null) {
+  const {
+    clientX,
+    clientY,
+    currentTarget
+  } = evt
+  
+  const current = target || currentTarget
+  
+  const {
+    left,
+    top
+  } = current.getBoundingClientRect()
+  
+  
+  return [clientX - left, clientY - top + ((pTarget || {}).scrollTop || 0)]
 }
 
 export function isIntersect({ clientX, clientY }, target) {

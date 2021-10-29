@@ -138,7 +138,7 @@ export default {
         this.drawLine(color);
         this.drawDesc(color);
         this.drawArrow(color);
-        this.$el.style.zIndex = '1';
+        this.$el.style.zIndex = this.inPath? '3': this.hasTextDesc? '1':'2';
       }
     },
 
@@ -405,6 +405,7 @@ export default {
     padding: 3px 6px;
     border-radius: 50%;
     font-size: 12px;
+    // transform: translate(-50%, -50%);
     cursor: pointer;
   }
 }

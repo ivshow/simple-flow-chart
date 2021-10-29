@@ -26,6 +26,8 @@
           :linkMenu="linkMenuList"
           :linkBaseStyle="linkBaseStyle"
           :range="range"
+          :nodeList="nodeList"
+          :linkList="linkList"
           maxTotal="20"
           @canvasMousedown="canvasMousedown"
           @canvasMousemove="canvasMousemove"
@@ -95,6 +97,36 @@ export default {
           label: '结束'
         }
       ],
+      copyBasicNodeList: [
+        {
+          id: 'start',
+          label: '开始'
+        },
+        {
+          id: 'node1',
+          label: '节点1'
+        },
+        {
+          id: 'node2',
+          label: '节点2'
+        },
+        {
+          id: 'node3',
+          label: '节点3'
+        },
+        {
+          id: 'node4',
+          label: '节点4'
+        },
+        {
+          id: 'node5',
+          label: '节点5'
+        },
+        {
+          id: 'end',
+          label: '结束'
+        }
+      ],
       nodeMenu: [
         [
           {
@@ -106,16 +138,16 @@ export default {
       linkMenuList: [
         [
           {
-            label: '删除',
+            label: '编辑',
             disable: false,
-            selected: link => link.remove()
+            selected: this.setLinkDesc
           }
         ],
         [
           {
-            label: '编辑',
+            label: '删除',
             disable: false,
-            selected: this.setLinkDesc
+            selected: link => link.remove()
           }
         ]
       ],
@@ -125,17 +157,25 @@ export default {
         lineColorMinor: '#FDCF53', // line 没有数字的颜色
         background: 'none' // 描述文字背景色
       },
-      range: ['node2', 'node5']
+      range: ['node2', 'node5'],
+      nodeList: [],
+      linkList:[]
     };
   },
   methods: {
+    getBasicNodeList() {
+      const ids = this.$refs.flowChart.graph.nodeList.map(e => e.id)
+      this.basicNodeList = _.reject(this.copyBasicNodeList, (e)=>{return ids.includes(e.id)} )
+    },
     removeNode(node) {
       node.remove();
-      this.$set(_.find(this.basicNodeList, { id: node.id }), 'disabled', false);
+      this.getBasicNodeList();
       // this.$refs.flowChart.updateFishBoneNode();
     },
     handleNodeClick(id) {
       this.activeNodeId = id;
+      // console.log(JSON.stringify(this.$refs.flowChart.graph.nodeList))
+      // console.log(JSON.stringify(this.$refs.flowChart.graph.linkList))
     },
     setLinkDesc(link) {
       link.meta.desc = prompt('');
@@ -157,7 +197,7 @@ export default {
 
       if (node) {
         this.handleNodeClick(item.id);
-        this.$set(item, 'disabled', true);
+        this.getBasicNodeList();
       }
     },
     addTemplate() {
@@ -175,7 +215,13 @@ export default {
     canvasMousemove() {
       console.log('移动');
     }
-  }
+  },
+  mounted() {
+    this.nodeList = JSON.parse('[{"id":"node1","width":120,"height":40,"coordinate":[88,85],"meta":{"width":120,"height":40,"id":"node1","label":"节点1"}},{"id":"node2","width":120,"height":40,"coordinate":[284,201],"meta":{"width":120,"height":40,"id":"node2","label":"节点2"}}]')
+    this.linkList = JSON.parse('[{"id":"linkS4UP4MvmicS0RCYe","startId":"node1","endId":"node2","startAt":[60,40],"endAt":[60,0],"meta":{"desc":0,"error":false}}]')
+    this.$nextTick(()=> this.getBasicNodeList())
+    
+  },
 };
 </script>
 

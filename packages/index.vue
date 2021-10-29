@@ -241,6 +241,37 @@ export default {
         left: `${left + this.graph.origin[0]}px`
       };
     },
+    // getBeyondLimitPath() {
+    //   const allPath = [];
+    //   const { linkList } = this.graph;
+    //   const [start] = this.range;
+    //   console.log(this.range, '------------range')
+    //   const findPath = (id, path = [], total = 0, parentIds = []) => {
+    //     const children = linkList.filter(x => x.start.id === id && this.isNodeInRange(x.end.id));
+    //     console.log(children, '--------------children')
+
+    //     // 本次循环无子级 或者 id已存在，则结束
+    //     if ((!children.length || parentIds.includes(id)) && total > Number(this.maxTotal)) {
+    //       return allPath.push(...path);
+    //     }
+
+    //     // 通过已存在的id，解决死循环
+    //     if (parentIds.includes(id)) return;
+
+    //     children.forEach(x => {
+    //       const paths = [...path];
+    //       let number = total;
+    //       paths.push(x.id);
+    //       number += Number(x.meta.desc);
+    //       findPath(x.end.id, paths, number, [...parentIds, id]);
+    //     });
+    //   };
+
+    //   findPath(start);
+    //   console.log(allPath, '---------------allPath')
+
+    //   return allPath;
+    // },
     getBeyondLimitPath() {
       const allPath = [];
       const { linkList } = this.graph;
@@ -251,10 +282,8 @@ export default {
         if (isEnd && total > Number(this.maxTotal)) {
           return allPath.push(...path);
         }
-
         // 通过已存在的id，解决死循环
         if (parentIds.includes(id)) return;
-
         children.forEach(x => {
           const paths = [...path];
           let number = total;
@@ -263,16 +292,13 @@ export default {
           findPath(x.end.id, paths, x.end.id === end, number, [...parentIds, id]);
         });
       };
-
       findPath(start);
-
       return allPath;
     },
     rangeNodeIndex() {
       const [start, end] = this.range;
       const startIndex = _.findIndex(this.graph.nodeList, { id: start });
       const endIndex = _.findIndex(this.graph.nodeList, { id: end });
-
       return [startIndex, endIndex + 1];
     }
   },
@@ -382,7 +408,7 @@ export default {
       const conf = this.moveNodeConf;
       const origin = this.graph.origin;
       const position = vector(conf.offset)
-        .differ(getOffset(evt, this.$el))
+        .differ(getOffset(evt, this.$el, this.$refs['flow-canvas']))
         .minus(origin)
         .add([conf.node.width / 2, conf.node.height / 2]).end;
 
@@ -427,7 +453,7 @@ export default {
     },
 
     moveTemEdge(evt) {
-      this.temEdgeConf.link.movePosition = getOffset(evt, this.$el);
+      this.temEdgeConf.link.movePosition = getOffset(evt, this.$el, this.$refs['flow-canvas']);
     },
 
     moveWhole(evt) {
@@ -439,7 +465,7 @@ export default {
 
     contextmenu(evt) {
       const mouseonLink = this.graph.mouseonLink;
-      const position = getOffset(evt);
+      const position = getOffset(evt, null, this.$refs['flow-canvas']);
       let list, source;
 
       if (mouseonLink) {
@@ -499,7 +525,7 @@ export default {
     nodeContextmenu(evt, node) {
       const list = this.initMenu(this.nodeMenu, node);
       if (!list.length) return;
-      this.$set(this.menuConf, 'position', getOffset(evt, this.$el));
+      this.$set(this.menuConf, 'position', getOffset(evt, this.$el, this.$refs['flow-canvas']));
       this.$set(this.menuConf, 'list', list);
       this.$set(this.menuConf, 'source', node);
       this.menuConf.visible = true;
@@ -511,7 +537,7 @@ export default {
           start: node,
           startAt
         });
-        link.movePosition = getOffset(evt, this.$el);
+        link.movePosition = getOffset(evt, this.$el, this.$refs['flow-canvas']);
         this.$set(this.temEdgeConf, 'link', link);
         this.temEdgeConf.visible = true;
       }
@@ -540,7 +566,7 @@ export default {
     },
 
     getMouseCoordinate(clientX, clientY) {
-      const offset = getOffset({ clientX, clientY }, this.$el);
+      const offset = getOffset({ clientX, clientY }, this.$el, this.$refs['flow-canvas']);
       return vector(offset).minus(this.graph.origin).end;
     },
 
@@ -645,7 +671,9 @@ export default {
     },
 
     isNodeInRange(id) {
+      console.log(id, '----------------id')
       const index = _.findIndex(this.graph.nodeList, { id });
+      console.log(index, '----------------index')
       return _.inRange(index, ...this.rangeNodeIndex);
     }
   },
@@ -697,7 +725,8 @@ export default {
   background-color: transparent;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  // overflow: hidden;
+  overflow: auto;
 
   > .select-all__mask {
     position: absolute;
