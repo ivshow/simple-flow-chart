@@ -97,12 +97,8 @@ export default {
 
 <style lang="less">
 .super-flow__node {
-  box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.2);
   user-select: none;
-
   position: absolute;
-  background-color: #ffffff;
-  border: 1px solid rgb(180, 180, 180);
   z-index: 3;
   outline: none;
 
@@ -112,9 +108,6 @@ export default {
 
   &-header {
     background-color: green;
-  }
-
-  &-body {
   }
 
   .node-side {
@@ -149,10 +142,6 @@ export default {
       left: -(@size / 2);
       width: @size;
     }
-  }
-
-  &:hover {
-    box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.4);
   }
 
   &.isSelect {

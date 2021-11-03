@@ -33,12 +33,14 @@
           @canvasMousemove="canvasMousemove"
         >
           <template #node="{ meta }">
-            <div
-              @click="handleNodeClick(meta.id)"
-              class="flow-node ellipsis"
-              :class="{ active: activeNodeId === meta.id }"
-            >
-              {{ meta.label }}
+            <div class="node-wrapper">
+              <div
+                @click="handleNodeClick(meta.id)"
+                class="flow-node ellipsis"
+                :class="{ active: activeNodeId === meta.id }"
+              >
+                {{ meta.label }}
+              </div>
             </div>
           </template>
           <!-- <template #menuItem="{ item }">
@@ -60,7 +62,7 @@ import _ from 'lodash';
 
 const basicNodeInfo = {
   width: 120,
-  height: 40
+  height: 50
 };
 
 export default {
@@ -159,13 +161,15 @@ export default {
       },
       range: ['node2', 'node5'],
       nodeList: [],
-      linkList:[]
+      linkList: []
     };
   },
   methods: {
     getBasicNodeList() {
-      const ids = this.$refs.flowChart.graph.nodeList.map(e => e.id)
-      this.basicNodeList = _.reject(this.copyBasicNodeList, (e)=>{return ids.includes(e.id)} )
+      const ids = this.$refs.flowChart.graph.nodeList.map(e => e.id);
+      this.basicNodeList = _.reject(this.copyBasicNodeList, e => {
+        return ids.includes(e.id);
+      });
     },
     removeNode(node) {
       node.remove();
@@ -217,11 +221,14 @@ export default {
     }
   },
   mounted() {
-    this.nodeList = JSON.parse('[{"id":"node1","width":120,"height":40,"coordinate":[88,85],"meta":{"width":120,"height":40,"id":"node1","label":"节点1"}},{"id":"node2","width":120,"height":40,"coordinate":[284,201],"meta":{"width":120,"height":40,"id":"node2","label":"节点2"}}]')
-    this.linkList = JSON.parse('[{"id":"linkS4UP4MvmicS0RCYe","startId":"node1","endId":"node2","startAt":[60,40],"endAt":[60,0],"meta":{"desc":0,"error":false}}]')
-    this.$nextTick(()=> this.getBasicNodeList())
-    
-  },
+    this.nodeList = JSON.parse(
+      '[{"id":"node1","width":120,"height":50,"coordinate":[88,85],"meta":{"width":120,"height":50,"id":"node1","label":"节点1"}},{"id":"node2","width":120,"height":50,"coordinate":[284,201],"meta":{"width":120,"height":50,"id":"node2","label":"节点2"}}]'
+    );
+    this.linkList = JSON.parse(
+      '[{"id":"linkS4UP4MvmicS0RCYe","startId":"node1","endId":"node2","startAt":[60,40],"endAt":[60,0],"meta":{"desc":0,"error":false}}]'
+    );
+    this.$nextTick(() => this.getBasicNodeList());
+  }
 };
 </script>
 
@@ -277,7 +284,8 @@ export default {
     bottom: 0;
   }
 
-  .super-flow__node {
+  .node-wrapper {
+    padding: 5px;
     .flow-node {
       box-sizing: border-box;
       width: 100%;
@@ -285,6 +293,7 @@ export default {
       line-height: 40px;
       font-size: 12px;
       text-align: center;
+      background: #fff;
     }
     .active {
       border: 2px solid red;
