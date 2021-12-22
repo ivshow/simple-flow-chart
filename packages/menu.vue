@@ -173,9 +173,9 @@ export default {
     }
 
     &-line {
-      width: 100%;
-      margin: 4px 0;
-      border-bottom: 1px solid rgb(180, 180, 180);
+      // width: 100%;
+      // margin: 4px 0;
+      // border-bottom: 1px solid rgb(180, 180, 180);
       height: 0;
 
       &:last-child {

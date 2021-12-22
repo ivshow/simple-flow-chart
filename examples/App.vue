@@ -19,7 +19,7 @@
           <button @click="saveTemplate">保存模板</button>
         </div>
       </div>
-      <div class="flow-container">
+      <div class="flow-container" ref="flowContainer">
         <simple-flow-chart
           ref="flowChart"
           :nodeMenu="nodeMenu"
@@ -28,6 +28,7 @@
           :range="range"
           :nodeList="nodeList"
           :linkList="linkList"
+          :el="el"
           maxTotal="20"
           @canvasMousedown="canvasMousedown"
           @canvasMousemove="canvasMousemove"
@@ -161,7 +162,8 @@ export default {
       },
       range: ['node2', 'node5'],
       nodeList: [],
-      linkList: []
+      linkList:[],
+      el: null
     };
   },
   methods: {
@@ -221,14 +223,14 @@ export default {
     }
   },
   mounted() {
-    this.nodeList = JSON.parse(
-      '[{"id":"node1","width":120,"height":50,"coordinate":[88,85],"meta":{"width":120,"height":50,"id":"node1","label":"节点1"}},{"id":"node2","width":120,"height":50,"coordinate":[284,201],"meta":{"width":120,"height":50,"id":"node2","label":"节点2"}}]'
-    );
-    this.linkList = JSON.parse(
-      '[{"id":"linkS4UP4MvmicS0RCYe","startId":"node1","endId":"node2","startAt":[60,40],"endAt":[60,0],"meta":{"desc":0,"error":false}}]'
-    );
-    this.$nextTick(() => this.getBasicNodeList());
-  }
+    this.nodeList = JSON.parse('[{"id":"node1","width":120,"height":50,"coordinate":[88,85],"meta":{"width":120,"height":50,"id":"node1","label":"节点1"}},{"id":"node2","width":120,"height":50,"coordinate":[284,201],"meta":{"width":120,"height":50,"id":"node2","label":"节点2"}}]')
+    this.linkList = JSON.parse('[{"id":"linkS4UP4MvmicS0RCYe","startId":"node1","endId":"node2","startAt":[60,50],"endAt":[60,0],"meta":{"desc":0,"error":false}}]')
+    this.$nextTick(()=> {
+      this.getBasicNodeList();
+      this.el = this.$refs.flowContainer;
+    })
+    
+  },
 };
 </script>
 
@@ -286,6 +288,8 @@ export default {
 
   .node-wrapper {
     padding: 5px;
+    height: 100%;
+    box-sizing: border-box;
     .flow-node {
       box-sizing: border-box;
       width: 100%;
@@ -295,9 +299,13 @@ export default {
       text-align: center;
       background: #fff;
     }
-    .active {
-      border: 2px solid red;
-    }
+    // .active {
+    //   border: 2px solid red;
+    // }
+  }
+  .node-wrapper:hover {
+    border: 5px solid;
+    padding: 0;
   }
 }
 </style>

@@ -28,7 +28,8 @@ export default {
     index: Number,
     graph: Object,
     link: Object,
-    dblclickLink: [Function, null]
+    dblclickLink: [Function, null],
+    el: HTMLDivElement,
   },
   data() {
     return {
@@ -102,7 +103,6 @@ export default {
       this.right = maxX + this.padding;
       this.bottom = maxY + this.padding;
       this.left = minX - this.padding;
-
       this.currentPointList = pointList.map(point => {
         return [Math.floor(point[0] - this.left), Math.floor(point[1] - this.top)];
       });
@@ -152,7 +152,7 @@ export default {
       ctx.lineJoin = 'round';
       ctx.beginPath();
       if (this.inPath) {
-        ctx.shadowBlur = 2;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = strokeStyle;
       } else {
         ctx.shadowBlur = 0;
@@ -184,7 +184,7 @@ export default {
         background,
         color,
         transform: this.setTextCenter(),
-        ...(this.inPath && { 'font-size': '16px' })
+        ...(this.inPath && { 'font-size': '18px', 'font-weight': 'bold' })
       };
     },
 
@@ -338,6 +338,9 @@ export default {
     },
 
     rootMousemove({ evt }) {
+      if (!isIntersect(evt, this.el)) {
+        return this.inPath = false
+      }
       this.inPath = this.isPointInStroke(evt) || this.isInText(evt);
       return this.inPath;
     },

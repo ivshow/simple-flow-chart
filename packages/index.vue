@@ -33,6 +33,7 @@
       :link-desc="linkDesc"
       :link-style="linkStyle"
       :dblclickLink="dblclickLink"
+      :el="el"
       @changeLinkStyle="changeLinkStyle"
     >
       <template v-slot="{ meta }">
@@ -188,7 +189,8 @@ export default {
     range: {
       type: Array,
       default: () => ['start', 'end']
-    }
+    },
+    el: HTMLDivElement,
   },
   data() {
     return {
@@ -313,7 +315,8 @@ export default {
       document.removeEventListener('dblclick', this.dblclick);
     });
     this.$nextTick(() => {
-      this.graph.initNode(this.nodeList);
+      const nodeList = _.cloneDeep(this.nodeList)
+      this.graph.initNode(nodeList);
       this.graph.initLink(this.linkList);
     });
   },
@@ -588,7 +591,8 @@ export default {
 
     // 判断鼠标是否进入 flow container
     addNodeIfNeed(evevt, info) {
-      if (isIntersect(evevt, this.$el)) {
+      const el = info.el || this.$el
+      if (isIntersect(evevt, el )) {
         const coordinate = this.getMouseCoordinate(evevt.clientX - info.width / 2, evevt.clientY - info.height / 2);
 
         return this.addNode({
@@ -696,7 +700,8 @@ export default {
       this.graph.origin = this.origin || [];
     },
     nodeList() {
-      this.graph.initNode(this.nodeList);
+      const nodeList = _.cloneDeep(this.nodeList)
+      this.graph.initNode(nodeList);
     },
     linkList() {
       this.graph.initLink(this.linkList);
