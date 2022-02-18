@@ -25,7 +25,7 @@ class Graph extends GraphEvent {
     this.mouseonNode = null;
 
     this.graphSelected = false;
-    this.maskBoundingClientRect = {};
+    this.maskBoundingRect = {};
 
     this.initNode(nodeList);
     this.initLink(linkList);
@@ -154,7 +154,7 @@ class Graph extends GraphEvent {
     const nodeList = this.nodeList;
     const margin = 20;
 
-    this.maskBoundingClientRect = {
+    this.maskBoundingRect = {
       top: Math.min(...nodeList.map(node => node.center[1] - node.height / 2)) - margin,
 
       right: Math.max(...nodeList.map(node => node.center[0] + node.width / 2)) + margin,

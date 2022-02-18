@@ -10,6 +10,7 @@
     @contextmenu.prevent.stop="contextmenu"
     @mousedown.left="canvasMousedown"
     @mousemove="canvasMousemove"
+    @mouseup="canvasMouseup"
   >
     <graph-line
       v-if="temEdgeConf.visible"
@@ -90,9 +91,8 @@
       ref="selectAllMask"
       tabindex="-1"
       :style="maskStyle"
-      @blur="graph.graphSelected = false"
       v-show="graph.graphSelected"
-      @mousedown="selectAllMaskMouseDown"
+      @mousedown.stop="selectAllMaskMouseDown"
       @contextmenu.prevent.stop
     ></div>
 
@@ -111,7 +111,7 @@ import GraphNode from './node';
 import GraphLine from './link';
 import MarkLine from './markLine';
 
-import { getOffset, isIntersect, isBool, isFun, vector, debounce, arrayReplace } from './utils';
+import { getOffset, isIntersect, isBool, isFun, vector, debounce, arrayReplace, rectIsIntersect } from './utils';
 
 export default {
   name: 'simple-flow-chart',
@@ -191,6 +191,7 @@ export default {
       default: () => ['start', 'end']
     },
     el: HTMLDivElement,
+    draggableMultiple: Boolean
   },
   data() {
     return {
@@ -235,7 +236,7 @@ export default {
   },
   computed: {
     maskStyle() {
-      const { top, right, bottom, left } = this.graph.maskBoundingClientRect;
+      const { top, right, bottom, left } = this.graph.maskBoundingRect;
       return {
         width: `${right - left}px`,
         height: `${bottom - top}px`,
@@ -243,37 +244,6 @@ export default {
         left: `${left + this.graph.origin[0]}px`
       };
     },
-    // getBeyondLimitPath() {
-    //   const allPath = [];
-    //   const { linkList } = this.graph;
-    //   const [start] = this.range;
-    //   console.log(this.range, '------------range')
-    //   const findPath = (id, path = [], total = 0, parentIds = []) => {
-    //     const children = linkList.filter(x => x.start.id === id && this.isNodeInRange(x.end.id));
-    //     console.log(children, '--------------children')
-
-    //     // 本次循环无子级 或者 id已存在，则结束
-    //     if ((!children.length || parentIds.includes(id)) && total > Number(this.maxTotal)) {
-    //       return allPath.push(...path);
-    //     }
-
-    //     // 通过已存在的id，解决死循环
-    //     if (parentIds.includes(id)) return;
-
-    //     children.forEach(x => {
-    //       const paths = [...path];
-    //       let number = total;
-    //       paths.push(x.id);
-    //       number += Number(x.meta.desc);
-    //       findPath(x.end.id, paths, number, [...parentIds, id]);
-    //     });
-    //   };
-
-    //   findPath(start);
-    //   console.log(allPath, '---------------allPath')
-
-    //   return allPath;
-    // },
     getBeyondLimitPath() {
       const allPath = [];
       const { linkList } = this.graph;
@@ -315,7 +285,7 @@ export default {
       document.removeEventListener('dblclick', this.dblclick);
     });
     this.$nextTick(() => {
-      const nodeList = _.cloneDeep(this.nodeList)
+      const nodeList = _.cloneDeep(this.nodeList);
       this.graph.initNode(nodeList);
       this.graph.initLink(this.linkList);
     });
@@ -386,6 +356,9 @@ export default {
       this.temEdgeConf.link = null;
 
       this.moveAllConf.isMove = false;
+
+      this.graph.maskBoundingLastRect = null;
+      this.setSelectedNodeLastCenter(true);
     },
 
     docMousemove(evt) {
@@ -394,7 +367,7 @@ export default {
       } else if (this.temEdgeConf.visible) {
         this.moveTemEdge(evt);
       } else if (this.graph.graphSelected) {
-        this.moveWhole(evt);
+        this.moveSelectedNode(evt);
       } else if (this.linkEditable) {
         this.graph.dispatch(
           {
@@ -459,11 +432,20 @@ export default {
       this.temEdgeConf.link.movePosition = getOffset(evt, this.$el, this.$refs['flow-canvas']);
     },
 
-    moveWhole(evt) {
-      if (this.moveAllConf.isMove) {
-        const offset = vector(this.moveAllConf.downPosition).differ([evt.clientX, evt.clientY]).end;
-        arrayReplace(this.graph.origin, vector(this.moveAllConf.origin).add(offset).end);
-      }
+    moveSelectedNode(evt) {
+      if (!this.moveAllConf.isMove) return;
+
+      const { left, top, bottom, right } = this.graph.maskBoundingLastRect;
+      const [x, y] = vector(this.moveAllConf.downPosition).differ([evt.clientX, evt.clientY]).end;
+
+      this.graph.maskBoundingRect = {
+        left: left + x,
+        top: top + y,
+        bottom: bottom + y,
+        right: right + x
+      };
+
+      this.selectedNodeList.forEach(node => (node.center = vector(node.lastCenter).add([x, y]).end));
     },
 
     contextmenu(evt) {
@@ -556,8 +538,10 @@ export default {
 
     selectAllMaskMouseDown(evt) {
       this.moveAllConf.isMove = true;
-      this.moveAllConf.origin = [...this.graph.origin];
+      // this.moveAllConf.origin = [...this.graph.origin];
+      this.setSelectedNodeLastCenter();
       this.moveAllConf.downPosition = [evt.clientX, evt.clientY];
+      this.graph.maskBoundingLastRect = { ...this.graph.maskBoundingRect };
     },
 
     selectedAll() {
@@ -590,10 +574,10 @@ export default {
     },
 
     // 判断鼠标是否进入 flow container
-    addNodeIfNeed(evevt, info) {
-      const el = info.el || this.$el
-      if (isIntersect(evevt, el )) {
-        const coordinate = this.getMouseCoordinate(evevt.clientX - info.width / 2, evevt.clientY - info.height / 2);
+    addNodeIfNeed(event, info) {
+      const el = info.el || this.$el;
+      if (isIntersect(event, el)) {
+        const coordinate = this.getMouseCoordinate(event.clientX - info.width / 2, event.clientY - info.height / 2);
 
         return this.addNode({
           ...info,
@@ -659,9 +643,54 @@ export default {
 
     canvasMousedown(e) {
       this.$emit('canvasMousedown', e);
+
+      if (this.draggableMultiple) {
+        this.mousedownCoordinate = e;
+        this.graph.graphSelected = false;
+      }
     },
     canvasMousemove(e) {
       this.$emit('canvasMousemove', e);
+      this.selectNode(e);
+    },
+    canvasMouseup(e) {
+      this.$emit('canvasMouseup', e);
+      this.mousedownCoordinate = null;
+    },
+
+    selectNode(e) {
+      if (!this.mousedownCoordinate) return;
+
+      this.setMaskBoundingClientRect(e);
+      this.graph.graphSelected = true;
+      this.selectedNodeList = this.graph.nodeList.filter(({ coordinate, width, height }) => {
+        const [left, top] = coordinate;
+        const nodeRect = { left, top, bottom: top + height, right: left + width };
+        return rectIsIntersect(this.graph.maskBoundingRect, nodeRect);
+      });
+    },
+
+    setSelectedNodeLastCenter(clear) {
+      this.selectedNodeList?.forEach(x => {
+        x.lastCenter = clear ? null : [...x.center];
+      });
+    },
+
+    setMaskBoundingClientRect({ clientX: x1, clientY: y1 }) {
+      const { clientX: x0, clientY: y0 } = this.mousedownCoordinate;
+      const [x, y] = this.getMouseCoordinate(x0, y0);
+      const offsetX = Math.abs(x1 - x0);
+      const offsetY = Math.abs(y1 - y0);
+
+      if (x1 >= x0 && y1 < y0) {
+        this.graph.maskBoundingRect = { left: x, top: y - offsetY, bottom: y, right: x + offsetX };
+      } else if (x1 < x0 && y1 < y0) {
+        this.graph.maskBoundingRect = { left: x - offsetX, top: y - offsetY, bottom: y, right: x };
+      } else if (x1 < x0 && y1 >= y0) {
+        this.graph.maskBoundingRect = { left: x - offsetX, top: y, bottom: y + offsetY, right: x };
+      } else if (x1 >= x0 && y1 >= y0) {
+        this.graph.maskBoundingRect = { left: x, top: y, bottom: y + offsetY, right: x + offsetX };
+      }
     },
 
     initTemplate({ nodeList, linkList }) {
@@ -675,20 +704,11 @@ export default {
     },
 
     isNodeInRange(id) {
-      console.log(id, '----------------id')
       const index = _.findIndex(this.graph.nodeList, { id });
-      console.log(index, '----------------index')
       return _.inRange(index, ...this.rangeNodeIndex);
     }
   },
   watch: {
-    'graph.graphSelected'() {
-      if (this.graph.graphSelected) {
-        this.$nextTick(() => {
-          this.$refs.selectAllMask.focus();
-        });
-      }
-    },
     'graph.mouseonLink'() {
       if (this.graph.mouseonLink) {
         document.body.style.cursor = 'pointer';
@@ -700,7 +720,7 @@ export default {
       this.graph.origin = this.origin || [];
     },
     nodeList() {
-      const nodeList = _.cloneDeep(this.nodeList)
+      const nodeList = _.cloneDeep(this.nodeList);
       this.graph.initNode(nodeList);
     },
     linkList() {

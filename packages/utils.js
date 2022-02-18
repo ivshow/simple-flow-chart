@@ -15,23 +15,14 @@ export function uuid(before = '', after = '') {
   return before + uuid.join('') + after;
 }
 
-
 export function getOffset(evt, target = null, pTarget = null) {
-  const {
-    clientX,
-    clientY,
-    currentTarget
-  } = evt
-  
-  const current = target || currentTarget
-  
-  const {
-    left,
-    top
-  } = current.getBoundingClientRect()
-  
-  
-  return [clientX - left, clientY - top + ((pTarget || {}).scrollTop || 0)]
+  const { clientX, clientY, currentTarget } = evt;
+
+  const current = target || currentTarget;
+
+  const { left, top } = current.getBoundingClientRect();
+
+  return [clientX - left, clientY - top + ((pTarget || {}).scrollTop || 0)];
 }
 
 export function isIntersect({ clientX, clientY }, target) {
@@ -173,4 +164,11 @@ export function debounce(fn, timestamp) {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(fn, timestamp);
   };
+}
+
+export function rectIsIntersect(rectA, rectB) {
+  const nonIntersect =
+    rectB.right < rectA.left || rectB.left > rectA.right || rectB.bottom < rectA.top || rectB.top > rectA.bottom;
+  //相交
+  return !nonIntersect;
 }

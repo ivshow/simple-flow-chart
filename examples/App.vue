@@ -32,6 +32,7 @@
           maxTotal="20"
           @canvasMousedown="canvasMousedown"
           @canvasMousemove="canvasMousemove"
+          draggableMultiple
         >
           <template #node="{ meta }">
             <div class="node-wrapper">
@@ -216,10 +217,10 @@ export default {
       console.log('%c 🍭 data: ', 'font-size:20px;background-color: #ED9EC7;color:#fff;', data);
     },
     canvasMousedown() {
-      console.log('按下');
+      // console.log('按下');
     },
     canvasMousemove() {
-      console.log('移动');
+      // console.log('移动');
     }
   },
   mounted() {
